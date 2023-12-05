@@ -10,7 +10,7 @@ const HEIGHT = window.innerHeight
 
 // DEFINING SCENE, SCENE2, CAMERA and RENDERER
 const scene = new THREE.Scene();
-const sceneSecond = new THREE.Scene();
+//const sceneSecond = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, WIDTH / HEIGHT, 0.1, 1000);
 camera.position.set(0, 0, 5);
 const renderer = new THREE.WebGLRenderer({alpha: true});
@@ -22,17 +22,16 @@ document.body.appendChild(renderer.domElement);
 const light = new THREE.HemisphereLight(0xffffff, 0x080820, 5);
 scene.add(light);
 const lightSecond = new THREE.HemisphereLight(0xffffff, 0x080820, 5);
-sceneSecond.add(lightSecond);
+//sceneSecond.add(lightSecond);
 
+const promisifiedLoad = (loader, file) => new Promise(resolve => loader.load(file, resolve))
 
 // DEFINING THE SANDWITCH
-let sandwitch;
 const loader = new GLTFLoader()
-loader.load('3d files/sandwitch.gltf', function (model) {
-    sandwitch = model.scene;
-    sandwitch.scale.set(2, 2, 2);
-    scene.add(sandwitch);
-});
+const model = await promisifiedLoad(loader,'3d files/sandwitch.gltf')
+const sandwitch = model.scene;
+sandwitch.scale.set(2, 2, 2);
+scene.add(sandwitch);
 
 
 //PLANE, CATPIC
@@ -42,7 +41,7 @@ const catPic = imageLoader.load('cat.jpg');
 const geometry = new THREE.BoxGeometry(9, 6, 2);
 const material = new THREE.MeshStandardMaterial({map: catPic});
 const cube = new THREE.Mesh(geometry, material);
-sceneSecond.add(cube);
+scene.add(cube);
 
 
 // SHADER SETUP
@@ -57,7 +56,7 @@ const fragShader = `
 			uniform sampler2D input1;
 			uniform sampler2D input2;
 			void main()	{
-                vec2 pixelatedUV = floor(vUv * 90.0) / 90.0;
+                vec2 pixelatedUV = floor(vUv * 50.0) / 50.0;
 			
 				vec4 texel1 = texture2D(input1, pixelatedUV);
                 vec4 texel2 = texture2D(input2, vUv);
@@ -95,12 +94,15 @@ composer.addPass(compositPass);
 function animate() {
     requestAnimationFrame(animate);
     sandwitch.rotation.y += 0.01;
-
+    cube.visible = false
+    sandwitch.visible = true
     renderer.setRenderTarget(compositRenderTarget1);
     renderer.render(scene, camera);
+    cube.visible = true
+    sandwitch.visible = false
     renderer.setRenderTarget(null);
     renderer.setRenderTarget(compositRenderTarget2);
-    renderer.render(sceneSecond, camera);
+    renderer.render(scene, camera);
     renderer.setRenderTarget(null);
 
     composer.render();
