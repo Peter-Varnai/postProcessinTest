@@ -56,7 +56,7 @@ const fragShader = `
 			uniform sampler2D input1;
 			uniform sampler2D input2;
 			void main()	{
-                vec2 pixelatedUV = floor(vUv * 90.0) / 90.0;
+                vec2 pixelatedUV = floor(vUv * 50.0) / 50.0;
 			
 				vec4 texel1 = texture2D(input1, pixelatedUV);
                 vec4 texel2 = texture2D(input2, vUv);
